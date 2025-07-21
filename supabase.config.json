@@ -1,6 +1,6 @@
 {
-  "projectId": "<your-project-ref>",
-  "orgId": "<your-org-id>",
+  "projectId": "<gqfmokuvggwgvqycdhdp>",
+  "orgId": "<GSVHHoTr0SX6FYJP>",
   "functions": {
     "fetchMedia": {
       "verify_jwt": false
