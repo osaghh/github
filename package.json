@@ -1,0 +1,9 @@
+{
+  "name": "instagram-downloader-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "supabase functions deploy fetchMedia --project-ref <your-project-ref> --no-verify-jwt"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
