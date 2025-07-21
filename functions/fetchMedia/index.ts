@@ -1,76 +1,71 @@
-// backend/functions/fetchMedia/index.ts
+// functions/fetchMedia/index.ts
+Deno.serve(async (req) => {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-async function fetchInstagramMedia(url: string) {
+  const { url } = await req.json();
+
+  if (!url || typeof url !== "string" || !url.startsWith("http")) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: "The string did not match the expected pattern.",
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
+    });
+  }
+
   try {
-    const response = await fetch('https://saveig.app/api/ajaxSearch', {
-      method: 'POST',
+    const response = await fetch("https://saveig.app/api/ajaxSearch", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: `q=${encodeURIComponent(url)}`,
     });
 
     const result = await response.json();
 
-    if (!result.status || !result.data?.medias?.length) {
-      return {
+    if (!result.status || !result.data || !result.data.medias?.length) {
+      return new Response(JSON.stringify({
         success: false,
-        error: 'No media found or invalid Instagram URL.'
-      };
-    }
-
-    const mediaList = result.data.medias.map((media: any) => ({
-      quality: media.quality || 'default',
-      url: media.url,
-      size: media.formattedSize || 'unknown',
-    }));
-
-    return {
-      success: true,
-      data: {
-        type: result.data.type || 'post',
-        url,
-        thumbnail: result.data.thumbnail,
-        downloadOptions: mediaList
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch real Instagram media'
-    };
-  }
-}
-
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    const { url } = await req.json();
-
-    if (!url || typeof url !== 'string') {
-      return new Response(JSON.stringify({ success: false, error: 'Invalid input.' }), {
-        headers: corsHeaders,
-        status: 400,
+        error: "No media found or invalid Instagram URL.",
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404,
       });
     }
 
-    const result = await fetchInstagramMedia(url);
+    const mediaList = result.data.medias.map((media: any) => ({
+      quality: media.quality || "default",
+      url: media.url,
+      size: media.formattedSize || "unknown",
+    }));
 
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({
+      success: true,
+      data: {
+        type: result.data.type || "post",
+        url,
+        thumbnail: result.data.thumbnail,
+        downloadOptions: mediaList,
+      },
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: 'Something went wrong.' }), {
-      headers: corsHeaders,
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error instanceof Error ? error.message : "Unexpected error.",
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
   }
