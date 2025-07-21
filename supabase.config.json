@@ -1,0 +1,9 @@
+{
+  "projectId": "<your-project-ref>",
+  "orgId": "<your-org-id>",
+  "functions": {
+    "fetchMedia": {
+      "verify_jwt": false
+    }
+  }
+}
